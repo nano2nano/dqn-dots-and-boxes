@@ -3,7 +3,7 @@ import random
 
 
 class DotsAndBoxes():
-    VERSION = '1.0'
+    VERSION = '1.1'
     ROWS = 5
     COLUMNS = 7
 
