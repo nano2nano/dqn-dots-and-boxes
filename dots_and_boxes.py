@@ -53,6 +53,7 @@ class DotsAndBoxes():
             else:
                 self.winner = -1 if self.score[0] > self.score[1] else 1
         self.done = True
+        self.turn = 0
 
     def _get_reward(self):
         return self.winner
