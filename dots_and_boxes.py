@@ -38,7 +38,7 @@ class DotsAndBoxes():
         return self.observe(), self._get_reward(), self.done, {}
 
     def observe(self):
-        return np.array(self.board)
+        return np.array([self.board])
 
     def _close_game(self, game_state, player):
         if self.winner != 0:
