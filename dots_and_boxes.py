@@ -45,7 +45,7 @@ class DotsAndBoxes():
         if self.winner != 0:
             raise ValueError('Invalid winner')
         if game_state == 'foul':
-            self.winner = -player
+            self.winner = 0
         elif game_state == 'done':
             if self.score[0] == self.score[1]:
                 # drow
