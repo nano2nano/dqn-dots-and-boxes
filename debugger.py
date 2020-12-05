@@ -7,6 +7,7 @@ from keras import backend as K
 from keras.layers import (BatchNormalization, Conv2D, Dense, Flatten, Input,
                           LeakyReLU, ReLU, Reshape, concatenate)
 from keras.models import Model, model_from_json
+from tqdm import tqdm
 
 from dots_and_boxes import DotsAndBoxes
 
@@ -59,7 +60,7 @@ def vs_random(network, battle_num=100):
     lose = 0
     drow = 0
     env = DotsAndBoxes()
-    for i in range(battle_num):
+    for i in tqdm(range(battle_num)):
         is_agent = False
         next_state, _, done, _ = env.reset()
         agent_turn = random.choice([-1, 1])
