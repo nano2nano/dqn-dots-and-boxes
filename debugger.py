@@ -59,6 +59,7 @@ def vs_random(network, battle_num=100):
     win = 0
     lose = 0
     drow = 0
+    counter = np.zeros(58)
     env = DotsAndBoxes()
     for i in tqdm(range(battle_num)):
         is_agent = False
@@ -78,6 +79,7 @@ def vs_random(network, battle_num=100):
             else:
                 action = random.choice(list(env.available_actions))
             next_state, _, done, _ = env.step(action)
+        counter[t-1] += 1
         # ゲーム終了
         if env.winner == agent_turn:
             win += 1
@@ -87,6 +89,9 @@ def vs_random(network, battle_num=100):
             drow += 1
         else:
             raise ValueError('winnerに予期せぬ値がセットされています')
+    for i in range(len(counter)):
+        if counter[i] > 0:
+            print('turn {} counter : {}'.format(i+1, counter[i]))
     return win, lose, drow
 
 
