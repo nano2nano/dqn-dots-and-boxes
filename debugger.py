@@ -100,4 +100,4 @@ def vs_random(network, battle_num=100):
 
 if __name__ == "__main__":
     win, lose, drow, foul = vs_random(QNetwork())
-    print('win : %d , lose : %d , drow : %d , foul : %d' % (win, lose, drow, foul))
+    print('win : {} , lose : {} , drow : {} , foul : {}'.format(win, lose, drow, foul))
