@@ -66,7 +66,7 @@ def vs_random(network, battle_num=100):
         agent_turn = random.choice([-1, 1])
         t = 0
         while not done:
-            if 58-len(env.available_actions) != t:
+            if env.action_size-len(env.available_actions) != t:
                 raise ValueError('available_actionが不正です')
             t += 1
             # 状態更新
