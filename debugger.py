@@ -59,6 +59,7 @@ def vs_random(network, battle_num=100):
     win = 0
     lose = 0
     drow = 0
+    foul = 0
     counter = np.zeros(58)
     env = DotsAndBoxes()
     for i in tqdm(range(battle_num)):
@@ -81,7 +82,9 @@ def vs_random(network, battle_num=100):
             next_state, _, done, _ = env.step(action)
         counter[t-1] += 1
         # ゲーム終了
-        if env.winner == agent_turn:
+        if env.foul:
+            foul += 1
+        elif env.winner == agent_turn:
             win += 1
         elif env.winner == -1*agent_turn:
             lose += 1
@@ -92,9 +95,9 @@ def vs_random(network, battle_num=100):
     for i in range(len(counter)):
         if counter[i] > 0:
             print('turn {} counter : {}'.format(i+1, counter[i]))
-    return win, lose, drow
+    return win, lose, drow, foul
 
 
 if __name__ == "__main__":
-    win, lose, drow = vs_random(QNetwork())
-    print('win : %d , lose : %d , drow : %d' % (win, lose, drow))
+    win, lose, drow, foul = vs_random(QNetwork())
+    print('win : %d , lose : %d , drow : %d , foul : %d' % (win, lose, drow, foul))
