@@ -17,6 +17,7 @@ class DotsAndBoxes():
     def reset(self):
         self.done = False
         self.winner = 0
+        self.foul = False
         self.score = [0, 0]  # -1, 1
         self.turn = -1
         self.board = np.zeros(self.state_size)
@@ -46,6 +47,7 @@ class DotsAndBoxes():
             raise ValueError('Invalid winner')
         if game_state == 'foul':
             self.winner = -player
+            self.foul = True
         elif game_state == 'done':
             if self.score[0] == self.score[1]:
                 # drow
