@@ -2,10 +2,8 @@ import os
 import random
 
 import numpy as np
-import tensorflow as tf
-from keras import backend as K
-from keras.layers import (BatchNormalization, Conv2D, Dense, Flatten, Input,
-                          LeakyReLU, ReLU, Reshape, concatenate)
+from keras.layers import (Conv2D, Dense, Flatten, Input, LeakyReLU, Reshape,
+                          concatenate)
 from keras.models import Model, model_from_json
 from tqdm import tqdm
 
@@ -92,12 +90,13 @@ def vs_random(network, battle_num=100):
             drow += 1
         else:
             raise ValueError('winnerに予期せぬ値がセットされています')
-    for i in range(len(counter)):
-        if counter[i] > 0:
-            print('turn {} counter : {}'.format(i+1, counter[i]))
+    for i, count in enumerate(counter):
+        if count > 0:
+            print('turn {} counter : {}'.format(i+1, count))
     return win, lose, drow, foul
 
 
 if __name__ == "__main__":
     win, lose, drow, foul = vs_random(QNetwork())
-    print('win : {} , lose : {} , drow : {} , foul : {}'.format(win, lose, drow, foul))
+    print('win : {} , lose : {} , drow : {} , foul : {}'.format(
+        win, lose, drow, foul))
