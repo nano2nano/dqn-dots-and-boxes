@@ -9,6 +9,12 @@ from tqdm import tqdm
 
 from dots_and_boxes import DotsAndBoxes
 
+import tensorflow as tf
+from keras.backend.tensorflow_backend import set_session
+gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.6)
+sess = tf.compat.v1.Session(
+    config=tf.compat.v1.ConfigProto(gpu_options=gpu_options))
+
 
 class QNetwork:
     def __init__(self):
