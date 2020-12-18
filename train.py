@@ -1,118 +1,101 @@
 import datetime
-import os
-import random
-import sys
 
-sys.path.append(os.path.dirname(os.path.dirname(
-    os.path.dirname(os.path.abspath(__file__)))))
-from collections import deque
+import tensorflow as tf
 
-import numpy as np
+from agent import Agent
 from dots_and_boxes import DotsAndBoxes
-
-from model import create_model
+from model import create_model, load_my_model
 from per_rank_base_memory import PERRankBaseMemory
-
-
-class QNetwork:
-    def __init__(self, state_size=(9, 13), action_size=58, learning_rate=None, weights_path=None):
-        self.action_size = action_size
-        self.state_size = state_size
-        self.actions = set(range(58))
-
-        self.model = create_model(self.state_size, self.action_size,
-                                  learning_rate=learning_rate, weights_path=weights_path)
-
-    def replay(self, memory, batch_size, gamma, targetQN):
-        indexes, batchs, _ = memory.sample(batch_size)
-        batch_td_error = 0
-
-        state_b = []
-        turn_b = []
-        action_b = []
-        reward_b = []
-        next_state_b = []
-        next_turn_b = []
-        available_actions_b = []
-        invalid_actions_b = []
-
-        for batch in batchs:
-            state_b.append(batch[0])
-            turn_b.append(batch[1])
-            action_b.append(batch[2])
-            reward_b.append(batch[3])
-            next_state_b.append(batch[4])
-            next_turn_b.append(batch[5])
-            available_actions_b.append(batch[6])
-            invalid_actions_b.append(batch[7])
-        state_b = np.asarray(state_b).reshape([batch_size, 9, 13])
-        turn_b = np.asarray(turn_b).reshape([batch_size, 1])
-        next_state_b = np.asarray(next_state_b).reshape([batch_size, 9, 13])
-        next_turn_b = np.asarray(next_turn_b).reshape([batch_size, 1])
-
-        outputs = self.model.predict([state_b, turn_b], batch_size)
-        state1_model_qvals_b = self.model.predict(
-            [next_state_b, next_turn_b], batch_size)
-        state1_target_qvals_b = targetQN.model.predict(
-            [next_state_b, next_turn_b], batch_size)
-
-        for i in range(batch_size):
-            if next_turn_b[i][0] == 0:
-                td_error = reward_b[i]
-            else:
-                maxq = state1_target_qvals_b[i][np.argmax(
-                    turn_b[i][0] * state1_model_qvals_b[i])]
-                td_error = reward_b[i] + gamma * maxq
-            td_error_diff = outputs[i][action_b[i]] - td_error
-            cond = np.abs(td_error_diff) > 0.7 and next_turn_b[i][0] == 0
-            if cond:
-                print('now : {}'.format(outputs[i][action_b[i]]))
-                print('target : {}'.format(td_error))
-                print('diff : {}'.format(np.abs(td_error_diff)))
-            batch_td_error += np.abs(td_error_diff)
-            outputs[i][invalid_actions_b[i]] = -turn_b[i]
-            outputs[i][action_b[i]] = td_error
-            memory.update(batchs[i], td_error_diff)
-        self.model.train_on_batch([state_b, turn_b], np.asarray(outputs))
-        return batch_td_error
-
-    def get_best_action(self, state, turn, valid_actions=None):
-        q_values = self.model.predict([state, turn])[0]
-        q_values = turn[0] * q_values
-        if valid_actions is None:
-            return np.argmax(q_values)
-        else:
-            idx = np.argmax(q_values[valid_actions])
-            return valid_actions[idx]
-
+from send_result2line import send_result2line
+from vs_random import vs_random
 
 if __name__ == "__main__":
-    PARAMS_DIR = './params'
-    MODEL_FILE = PARAMS_DIR+'/model.json'
-    DQN_MODE = 0  # 1がDQN、0がDDQN
+    ############################### for my environment ###############################
+    gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.6)
+    sess = tf.compat.v1.Session(
+        config=tf.compat.v1.ConfigProto(gpu_options=gpu_options))
+    ###################################################################################
+
+    LOAD_PARAMS = True
+    EPISODE_NUM = 1000000
+    MEMORY_SIZE = 1000000
+
+    PER_ALPHA = 0.6
+    MEMORY_FILE_PATH = './params/memory_dmp'
+    MODEL_FILE_PATH = './params/model.h5'
+    WEIGHTS_FILE_PATH = './params/latest_weights.h5'
+
+    GAMMA = 0.99
+    LEARNING_RATE = 1e-4
+    BATCH_SIZE = 32
+    EPSILON = 0.1
 
     env = DotsAndBoxes()
-    num_episodes = 100000  # 総試行回数
-    gamma = 0.99
-    isrender = 0
 
-    learning_rate = 1e-5
-    memory_capacity = 1_000_000
-    batch_size = 32
+    if LOAD_PARAMS:
+        main = load_my_model(MODEL_FILE_PATH, WEIGHTS_FILE_PATH)
+        target = load_my_model(MODEL_FILE_PATH, WEIGHTS_FILE_PATH)
+        memory = PERRankBaseMemory(
+            capacity=MEMORY_SIZE, alpha=PER_ALPHA, memory_path=MEMORY_FILE_PATH)
+    else:
+        main = create_model(state_size=env.state_size,
+                            action_size=env.action_size, learning_rate=LEARNING_RATE)
+        target = create_model(state_size=env.state_size,
+                              action_size=env.action_size, learning_rate=LEARNING_RATE)
+        memory = PERRankBaseMemory(
+            capacity=MEMORY_SIZE, alpha=PER_ALPHA)
 
-    per_alpha = 0.6
-    per_beta_initial = 0.0
-    per_beta_steps = 100_000
-    per_enable_is = False
+    agent = Agent(main=main, target=target, memory=memory,
+                  batch_size=BATCH_SIZE, gamma=GAMMA, epsilon=EPSILON)
 
-    state_size = env.observe().shape
+    all_action = set(range(env.action_size))
 
-    mainQN = QNetwork(learning_rate=learning_rate, action_size=env.action_size)
-    targetQN = QNetwork(learning_rate=learning_rate,
-                        action_size=env.action_size)
-    json_string = mainQN.model.to_json()
-    os.makedirs(PARAMS_DIR, exist_ok=True)
-    with open(MODEL_FILE, mode='w') as f:
-        f.write(json_string)
-    memory = PERRankBaseMemory(memory_capacity, per_alpha,
-                               per_beta_initial, per_beta_steps, MODEL_FILE)
+    for episode in range(EPISODE_NUM):
+        state, _, done, _ = env.reset()
+        step = 0
+        episode_td_error = list()
+        next_valid_actions = sorted(list(env.available_actions))
+        next_invalid_actions = sorted(list(all_action - env.available_actions))
+        while not done:
+            step += 1
+            turn = env.turn
+            valid_actions = next_valid_actions
+            invalid_actions = next_invalid_actions
+            action = agent.get_action(state, turn, valid_actions)
+            next_state, reward, done, _ = env.step(action)
+            next_turn = env.turn
+            next_valid_actions = sorted(list(env.available_actions))
+            next_invalid_actions = sorted(
+                list(all_action - env.available_actions))
+            memory.add((state, turn, action, reward, next_state,
+                        next_turn, valid_actions, invalid_actions, next_valid_actions, next_invalid_actions))
+
+            state = next_state
+
+            batch_td_error = agent.replay()
+            if batch_td_error != 0:
+                episode_td_error.append(batch_td_error)
+        # finish episode
+        agent.update_target_weights()
+        if len(episode_td_error) != 0:
+            print(
+                "--------------------- %d Episode finished---------------------" % (episode))
+            print("Finish turn：", step)
+            print('average td_error: ', (sum(episode_td_error) /
+                                         len(episode_td_error))/BATCH_SIZE)
+            print("----------------------------------------------------------")
+        if (episode+1) % 50 == 0:
+            win, lose, drow, max_turn, min_turn, avg_turn = vs_random(
+                agent, battle_num=100)
+            send_result2line(win, lose, drow, max_turn, min_turn, avg_turn)
+            print("戦績: ", win, "勝", lose, "敗")
+            print("最大ターン数: {}, 最小ターン数: {}, 平均ターン数: {}".format(
+                max_turn, min_turn, avg_turn))
+            agent.save_params(
+                MODEL_FILE_PATH, WEIGHTS_FILE_PATH, MEMORY_FILE_PATH)
+            if win/(win+lose+drow) > 0.9:
+                date = datetime.datetime.now().strftime('%Y%m%d_%H%M%S_')
+                base_name = date+str(win/(win+lose))
+                base_name = './high_score_params/' + base_name
+                agent.save_params(model_file_path=base_name+'_model.h5', weights_file_path=base_name +
+                                  '_weights.h5', memory_file_path=base_name+'_memory_dmp')

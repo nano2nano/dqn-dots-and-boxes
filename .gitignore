@@ -1,5 +1,5 @@
 .vscode
 __pycache__
-params
-high_score_params
+params/*
+high_score_params/*
 test.py
