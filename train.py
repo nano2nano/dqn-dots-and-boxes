@@ -67,7 +67,7 @@ if __name__ == "__main__":
             next_valid_actions = sorted(list(env.available_actions))
             next_invalid_actions = sorted(
                 list(all_action - env.available_actions))
-            memory.add((state, turn, action, reward, next_state,
+            agent.memory.add((state, turn, action, reward, next_state,
                         next_turn, valid_actions, invalid_actions, next_valid_actions, next_invalid_actions))
 
             state = next_state
