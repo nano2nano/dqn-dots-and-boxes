@@ -93,9 +93,10 @@ if __name__ == "__main__":
                 max_turn, min_turn, avg_turn))
             agent.save_params(
                 MODEL_FILE_PATH, WEIGHTS_FILE_PATH, MEMORY_FILE_PATH)
-            if win/(win+lose+drow) > 0.9:
+            win_rate = win/(win+lose+drow) * 100
+            if win_rate > 95:
                 date = datetime.datetime.now().strftime('%Y%m%d_%H%M%S_')
-                base_name = date+str(win/(win+lose))
+                base_name = date+str(int(win_rate))
                 base_name = './high_score_params/' + base_name
                 agent.save_params(model_file_path=base_name+'_model.h5', weights_file_path=base_name +
                                   '_weights.h5', memory_file_path=base_name+'_memory_dmp')
