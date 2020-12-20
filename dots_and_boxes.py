@@ -21,7 +21,8 @@ class DotsAndBoxes():
         self.score = [0, 0]  # -1, 1
         self.turn = -1
         self.board = np.zeros(self.state_size)
-        self.available_actions = set(range(self.action_size))
+        self.available_actions = list(range(self.action_size))
+        self.invalid_actions = list()
 
         return self.observe(), self._get_reward, self.done, {}
 
@@ -29,6 +30,7 @@ class DotsAndBoxes():
         player = self.turn
         if self._is_valid_action(action):
             self.available_actions.remove(action)
+            self.invalid_actions.append(action)
             i, j = self.actions[action]
             self.board[i, j] = player
             self._update(player, i, j)  # change turn if did not fill any box

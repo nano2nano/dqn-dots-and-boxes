@@ -48,14 +48,12 @@ if __name__ == "__main__":
     agent = Agent(main=main, target=target, memory=memory,
                   batch_size=BATCH_SIZE, gamma=GAMMA, epsilon=EPSILON)
 
-    all_action = set(range(env.action_size))
-
     for episode in range(EPISODE_NUM):
         state, _, done, _ = env.reset()
         step = 0
         episode_td_error = list()
-        next_valid_actions = sorted(list(env.available_actions))
-        next_invalid_actions = sorted(list(all_action - env.available_actions))
+        next_valid_actions = env.available_actions.copy()
+        next_invalid_actions = env.invalid_actions.copy()
         while not done:
             step += 1
             turn = env.turn
@@ -64,11 +62,10 @@ if __name__ == "__main__":
             action = agent.get_action(state, turn, valid_actions)
             next_state, reward, done, _ = env.step(action)
             next_turn = env.turn
-            next_valid_actions = sorted(list(env.available_actions))
-            next_invalid_actions = sorted(
-                list(all_action - env.available_actions))
-            agent.memory.add((state, turn, action, reward, next_state,
-                        next_turn, valid_actions, invalid_actions, next_valid_actions, next_invalid_actions))
+            next_valid_actions = env.available_actions.copy()
+            next_invalid_actions = env.invalid_actions.copy()
+            agent.memory.add((state, turn, action, reward, next_state, next_turn,
+                              valid_actions, invalid_actions, next_valid_actions, next_invalid_actions))
 
             state = next_state
 
