@@ -82,12 +82,10 @@ if __name__ == "__main__":
                                          len(episode_td_error))/BATCH_SIZE)
             print("----------------------------------------------------------")
         if (episode+1) % 50 == 0:
-            win, lose, drow, max_turn, min_turn, avg_turn = vs_random(
+            win, lose, drow, _, _, _ = vs_random(
                 agent, battle_num=100)
-            send_result2line(win, lose, drow, max_turn, min_turn, avg_turn)
+            send_result2line(win, lose, drow)
             print("戦績: ", win, "勝", lose, "敗")
-            print("最大ターン数: {}, 最小ターン数: {}, 平均ターン数: {}".format(
-                max_turn, min_turn, avg_turn))
             agent.save_params(
                 MODEL_FILE_PATH, WEIGHTS_FILE_PATH, MEMORY_FILE_PATH)
             win_rate = win/(win+lose+drow) * 100
