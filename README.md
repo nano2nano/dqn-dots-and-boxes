@@ -1,6 +1,8 @@
 # Requirement
-Anaconda上でpython3.6の環境にkeras-gpuをインストール. 
+tensorflow==2.3.0
+keras==2.4.3
 # Installation
+Anaconda上でpython3.6の環境にkeras-gpuをインストールした環境で動作確認してます. 
 ```bash
 conda install keras-gpu
 ```
