@@ -1,4 +1,5 @@
 import datetime
+import os
 
 import tensorflow as tf
 
@@ -24,6 +25,7 @@ if __name__ == "__main__":
     MEMORY_FILE_PATH = './params/memory_dmp'
     MODEL_FILE_PATH = './params/model.h5'
     WEIGHTS_FILE_PATH = './params/latest_weights.h5'
+    HIGHT_SCORE_DIRECTORY_PATH = './hight_score_params/'
 
     GAMMA = 0.99
     LEARNING_RATE = 1e-4
@@ -92,6 +94,6 @@ if __name__ == "__main__":
             if win_rate > 95:
                 date = datetime.datetime.now().strftime('%Y%m%d_%H%M%S_')
                 base_name = date+str(int(win_rate))
-                base_name = './high_score_params/' + base_name
+                base_name = os.path.join(HIGHT_SCORE_DIRECTORY_PATH, base_name)
                 agent.save_params(model_file_path=base_name+'_model.h5', weights_file_path=base_name +
                                   '_weights.h5', memory_file_path=base_name+'_memory_dmp')
