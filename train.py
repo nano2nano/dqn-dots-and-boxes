@@ -86,11 +86,11 @@ if __name__ == "__main__":
         if (episode+1) % 50 == 0:
             win, lose, drow, _, _, _ = vs_random(
                 agent, battle_num=100)
-            send_result2line(win, lose, drow)
+            winning_percentage = win/(win+lose+drow) * 100
+            send_result2line(win, lose, drow, winning_percentage)
             print("戦績: ", win, "勝", lose, "敗")
             agent.save_params(
                 MODEL_FILE_PATH, WEIGHTS_FILE_PATH, MEMORY_FILE_PATH)
-            winning_percentage = win/(win+lose+drow) * 100
             if winning_percentage > 95:
                 date = datetime.datetime.now().strftime('%Y%m%d_%H%M%S_')
                 base_name = date+str(int(winning_percentage))
