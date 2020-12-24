@@ -52,7 +52,7 @@ class DotsAndBoxes():
             self.foul = True
         elif game_state == 'done':
             if self.score[0] == self.score[1]:
-                # drow
+                # draw
                 self.winner = 0
             else:
                 self.winner = -1 if self.score[0] > self.score[1] else 1

@@ -84,12 +84,12 @@ if __name__ == "__main__":
                                          len(episode_td_error))/BATCH_SIZE)
             print("----------------------------------------------------------")
         if (episode+1) % 50 == 0:
-            win, lose, drow, _, _, _ = vs_random(
+            win, lose, draw, _, _, _ = vs_random(
                 agent, battle_num=100)
-            winning_percentage = win/(win+lose+drow) * 100
-            print("win : {}, lose : {}, drow : {}, WP : {}".format(
-                win, lose, drow, winning_percentage))
-            send_result2line(win, lose, drow, winning_percentage)
+            winning_percentage = win/(win+lose+draw) * 100
+            print("win : {}, lose : {}, draw : {}, WP : {}".format(
+                win, lose, draw, winning_percentage))
+            send_result2line(win, lose, draw, winning_percentage)
             agent.save_params(
                 MODEL_FILE_PATH, WEIGHTS_FILE_PATH, MEMORY_FILE_PATH)
             if winning_percentage > 95:
