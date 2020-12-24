@@ -90,10 +90,10 @@ if __name__ == "__main__":
             print("戦績: ", win, "勝", lose, "敗")
             agent.save_params(
                 MODEL_FILE_PATH, WEIGHTS_FILE_PATH, MEMORY_FILE_PATH)
-            win_rate = win/(win+lose+drow) * 100
-            if win_rate > 95:
+            winning_percentage = win/(win+lose+drow) * 100
+            if winning_percentage > 95:
                 date = datetime.datetime.now().strftime('%Y%m%d_%H%M%S_')
-                base_name = date+str(int(win_rate))
+                base_name = date+str(int(winning_percentage))
                 base_name = os.path.join(HIGHT_SCORE_DIRECTORY_PATH, base_name)
                 agent.save_params(model_file_path=base_name+'_model.h5', weights_file_path=base_name +
                                   '_weights.h5', memory_file_path=base_name+'_memory_dmp')
