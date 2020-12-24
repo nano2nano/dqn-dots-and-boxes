@@ -87,8 +87,9 @@ if __name__ == "__main__":
             win, lose, drow, _, _, _ = vs_random(
                 agent, battle_num=100)
             winning_percentage = win/(win+lose+drow) * 100
+            print("win : {}, lose : {}, drow : {}, WP : {}".format(
+                win, lose, drow, winning_percentage))
             send_result2line(win, lose, drow, winning_percentage)
-            print("戦績: ", win, "勝", lose, "敗")
             agent.save_params(
                 MODEL_FILE_PATH, WEIGHTS_FILE_PATH, MEMORY_FILE_PATH)
             if winning_percentage > 95:
