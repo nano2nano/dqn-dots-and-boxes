@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
     LOAD_PARAMS = True
     EPISODE_NUM = 1000000
-    MEMORY_SIZE = 1000000
+    MEMORY_SIZE = 10000
 
     PER_ALPHA = 0.6
     MEMORY_FILE_PATH = './params/memory_dmp'
@@ -28,9 +28,9 @@ if __name__ == "__main__":
     HIGHT_SCORE_DIRECTORY_PATH = './hight_score_params/'
 
     GAMMA = 0.99
-    LEARNING_RATE = 1e-4
+    LEARNING_RATE = 1e-5
     BATCH_SIZE = 32
-    EPSILON = 0.1
+    EPSILON = 0.01
 
     env = DotsAndBoxes()
 
